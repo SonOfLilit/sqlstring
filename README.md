@@ -73,12 +73,15 @@ Different value types are escaped differently, here is how:
 * Arrays are turned into list, e.g. `['a', 'b']` turns into `'a', 'b'`
 * Nested arrays are turned into grouped lists (for bulk inserts), e.g. `[['a',
   'b'], ['c', 'd']]` turns into `('a', 'b'), ('c', 'd')`
-* Objects that have a `toSqlString` method will have `.toSqlString()` called
-  and the returned value is used as the raw SQL.
-* Objects are turned into `key = 'val'` pairs for each enumerable property on
-  the object. If the property's value is a function, it is skipped; if the
-  property's value is an object, toString() is called on it and the returned
-  value is used.
+* To [improve our security posture](https://github.com/mysqljs/sqlstring/issues/60),
+  starting with version 3.0.0, trying to escape an object will by default throw
+  `TypeError`, and only if `allowObjectValues=true` will the old behavior be preserved:
+  * Objects that have a `toSqlString` method will have `.toSqlString()` called
+    and the returned value is used as the raw SQL.
+  * Objects are turned into `key = 'val'` pairs for each enumerable property on
+    the object. If the property's value is a function, it is skipped; if the
+    property's value is an object, toString() is called on it and the returned
+    value is used.
 * `undefined` / `null` are converted to `NULL`
 * `NaN` / `Infinity` are left as-is. MySQL does not support these, and trying
   to insert them as values will trigger MySQL errors until they implement

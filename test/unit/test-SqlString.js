@@ -71,16 +71,20 @@ test('SqlString.escape', {
     assert.equal(SqlString.escape(SqlString.raw('NOW()')), 'NOW()');
   },
 
-  'objects are turned into key value pairs': function() {
-    assert.equal(SqlString.escape({a: 'b', c: 'd'}), "`a` = 'b', `c` = 'd'");
+  'objects are turned into key value pairs when allowObjectValues=true': function() {
+    assert.equal(SqlString.escape({a: 'b', c: 'd'}, false, null, true), "`a` = 'b', `c` = 'd'");
   },
 
-  'objects function properties are ignored': function() {
-    assert.equal(SqlString.escape({a: 'b', c: function() {}}), "`a` = 'b'");
+  'objects are not allowed as values by default': function() {
+    assert.throws(() => SqlString.escape({a: 'b', c: 'd'}), "`a` = 'b', `c` = 'd'");
+  },
+
+  'objects function properties are ignored when allowObjectValues=true': function() {
+    assert.equal(SqlString.escape({a: 'b', c: function() {}}, false, null, true), "`a` = 'b'");
   },
 
   'object values toSqlString is called': function() {
-    assert.equal(SqlString.escape({id: { toSqlString: function() { return 'LAST_INSERT_ID()'; } }}), '`id` = LAST_INSERT_ID()');
+    assert.equal(SqlString.escape({id: { toSqlString: function() { return 'LAST_INSERT_ID()'; } }}, false, null, true), '`id` = LAST_INSERT_ID()');
   },
 
   'objects toSqlString is called': function() {
@@ -91,16 +95,16 @@ test('SqlString.escape', {
     assert.equal(SqlString.escape({ toSqlString: function() { return 'CURRENT_TIMESTAMP()'; } }), 'CURRENT_TIMESTAMP()');
   },
 
-  'nested objects are cast to strings': function() {
-    assert.equal(SqlString.escape({a: {nested: true}}), "`a` = '[object Object]'");
+  'nested objects are cast to strings when allowObjectValues=true': function() {
+    assert.equal(SqlString.escape({a: {nested: true}}, false, null, true), "`a` = '[object Object]'");
   },
 
-  'nested objects use toString': function() {
-    assert.equal(SqlString.escape({a: { toString: function() { return 'foo'; } }}), "`a` = 'foo'");
+  'nested objects use toString when allowObjectValues=true': function() {
+    assert.equal(SqlString.escape({a: { toString: function() { return 'foo'; } }}, false, null, true), "`a` = 'foo'");
   },
 
-  'nested objects use toString is quoted': function() {
-    assert.equal(SqlString.escape({a: { toString: function() { return "f'oo"; } }}), "`a` = 'f\\'oo'");
+  'nested objects use toString is quoted when allowObjectValues=true': function() {
+    assert.equal(SqlString.escape({a: { toString: function() { return "f'oo"; } }}, false, null, true), "`a` = 'f\\'oo'");
   },
 
   'arrays are turned into lists': function() {
@@ -292,7 +296,7 @@ test('SqlString.format', {
   },
 
   'objects is converted to values': function () {
-    var sql = SqlString.format('?', { 'hello': 'world' }, false);
+    var sql = SqlString.format('?', { 'hello': 'world' }, false, null, true);
     assert.equal(sql, "`hello` = 'world'");
   },
 

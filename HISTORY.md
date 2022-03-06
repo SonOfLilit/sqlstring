@@ -1,3 +1,8 @@
+unreleased
+==========
+
+  * `.escape()`, `.format()` etc' now throw `TypeError` on object values unless (new parameter) `allowObjectValues=true` is passed to them
+
 2.3.3 / 2022-03-06
 ==================
 
